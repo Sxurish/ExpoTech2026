@@ -14,7 +14,7 @@ from typing import Generator
 from dotenv import load_dotenv
 from sqlalchemy import create_engine, event, text
 from sqlalchemy.orm import sessionmaker, Session, DeclarativeBase
-from sqlalchemy.exc import OperationalError
+from sqlalchemy.exc import SQLAlchemyError
 
 load_dotenv()
 
@@ -95,7 +95,7 @@ class DatabaseManager:
             with self._engine.connect() as conn:
                 conn.execute(text("SELECT 1"))
             return True
-        except OperationalError as exc:
+        except SQLAlchemyError as exc:
             print(f"[DB] Connection failed: {exc}")
             return False
 

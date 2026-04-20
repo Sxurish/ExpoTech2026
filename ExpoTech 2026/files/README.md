@@ -9,30 +9,18 @@ and exam urgency.
 ## Project Structure
 
 ```
-study_planner/
-├── auth/
-│   ├── __init__.py
-│   └── auth_service.py        # Registration & login (bcrypt)
-├── cli/
-│   ├── __init__.py
-│   └── utils.py               # CLI helpers, coloured output
-├── database/
-│   ├── __init__.py
-│   ├── connection.py          # SQLAlchemy engine + session factory
-│   └── schema.sql             # Raw SQL schema (reference only)
-├── models/
-│   ├── __init__.py
-│   ├── user.py                # User ORM model
-│   ├── subject.py             # Subject ORM model
-│   └── study_plan.py          # StudyPlan ORM model
-├── services/
-│   ├── __init__.py
-│   ├── subject_service.py     # CRUD + validation for subjects
-│   └── planner_service.py     # Plan generation algorithm + persistence
+files/
 ├── main.py                    # CLI entry point
-├── requirements.txt
-├── .env.example
-└── README.md
+├── auth_service.py            # Registration & login (bcrypt)
+├── subject_service.py         # CRUD + validation for subjects
+├── planner_service.py         # Plan generation algorithm + persistence
+├── connection.py              # SQLAlchemy engine + session factory
+├── user.py                    # User ORM model
+├── subject.py                 # Subject ORM model
+├── study_plan.py              # StudyPlan ORM model
+├── utils.py                   # CLI helpers, coloured output
+├── schema.sql                 # Raw SQL schema (reference only)
+└── requirements.txt
 ```
 
 ---
@@ -51,7 +39,7 @@ study_planner/
 ### 1. Clone / Download the project
 
 ```bash
-cd study_planner
+cd "ExpoTech 2026/files"
 ```
 
 ### 2. Create a virtual environment
@@ -86,7 +74,7 @@ The application creates all tables automatically on first run.
 If you prefer to run the schema manually:
 
 ```bash
-mysql -u root -p study_planner < database/schema.sql
+mysql -u root -p study_planner < schema.sql
 ```
 
 ### 5. Configure environment variables
@@ -106,6 +94,12 @@ DB_PASSWORD=your_password
 ```
 
 ### 6. Run the application
+
+```bash
+python main.py
+```
+
+From the repository root, you can also run:
 
 ```bash
 python main.py
