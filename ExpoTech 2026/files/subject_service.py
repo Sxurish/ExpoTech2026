@@ -10,7 +10,7 @@ from datetime import date
 
 from sqlalchemy.orm import Session
 
-from models.subject import Subject
+from subject import Subject
 
 
 # ---------------------------------------------------------------------------

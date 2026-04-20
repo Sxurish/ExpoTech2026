@@ -24,8 +24,8 @@ from typing import NamedTuple
 
 from sqlalchemy.orm import Session
 
-from models.study_plan import StudyPlan
-from models.subject import Subject
+from study_plan import StudyPlan
+from subject import Subject
 
 
 # ---------------------------------------------------------------------------

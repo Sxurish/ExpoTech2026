@@ -13,7 +13,7 @@ import bcrypt
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from models.user import User
+from user import User
 
 
 # ---------------------------------------------------------------------------

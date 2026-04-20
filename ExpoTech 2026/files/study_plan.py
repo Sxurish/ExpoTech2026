@@ -11,7 +11,7 @@ from datetime import datetime
 from sqlalchemy import DateTime, ForeignKey, Integer, String, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from database.connection import Base
+from connection import Base
 
 
 class StudyPlan(Base):

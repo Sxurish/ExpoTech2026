@@ -15,21 +15,23 @@ import sys
 import os
 sys.path.insert(0, os.path.dirname(__file__))
 
-from auth.auth_service import (
+from auth_service import (
     AuthService,
     DuplicateEmailError,
     InvalidCredentialsError,
     ValidationError as AuthValidationError,
 )
-from cli.utils import (
+from utils import (
     banner, section, success, error, info,
     prompt, prompt_int, prompt_float, prompt_password,
     format_minutes, clear,
 )
-from database.connection import get_db
-from models import User, Subject, StudyPlan  # registers ORM models
-from services.planner_service import PlannerService
-from services.subject_service import SubjectService, SubjectValidationError
+from connection import get_db
+from user import User
+from subject import Subject
+from study_plan import StudyPlan
+from planner_service import PlannerService
+from subject_service import SubjectService, SubjectValidationError
 
 
 # ---------------------------------------------------------------------------

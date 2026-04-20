@@ -11,7 +11,7 @@ from datetime import date, datetime
 from sqlalchemy import Date, DateTime, ForeignKey, Integer, SmallInteger, String, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from database.connection import Base
+from connection import Base
 
 
 class Subject(Base):
