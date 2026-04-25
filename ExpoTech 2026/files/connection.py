@@ -37,7 +37,8 @@ class DatabaseManager:
     def __init__(self) -> None:
         self._engine = self._build_engine()
         self._SessionLocal = sessionmaker(
-            bind=self._engine, autocommit=False, autoflush=False
+            bind=self._engine, autocommit=False, autoflush=False,
+            expire_on_commit=False,   # keep attributes accessible after session.close()
         )
 
     # ------------------------------------------------------------------
@@ -55,7 +56,7 @@ class DatabaseManager:
     @staticmethod
     def _build_engine():
         db_user     = os.getenv("DB_USER", "root")
-        db_password = os.getenv("DB_PASSWORD", "")
+        db_password = os.getenv("DB_PASSWORD", "root")
         db_host     = os.getenv("DB_HOST", "localhost")
         db_port     = os.getenv("DB_PORT", "3306")
         db_name     = os.getenv("DB_NAME", "study_planner")

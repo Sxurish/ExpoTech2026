@@ -111,12 +111,10 @@ class PlannerService:
         if not rows:
             return {}
 
-        # Group by day, preserving insertion order
+        # Old plans are always deleted before saving a new one,
+        # so all rows belong to the current (and only) plan.
         plan: dict[str, list[PlanRow]] = defaultdict(list)
-        latest_ts = rows[0].generated_at
         for row in rows:
-            if row.generated_at != latest_ts:
-                break                         # stop at previous generation
             plan[row.day_of_week].append(row.to_dict())
 
         return dict(plan)
@@ -179,22 +177,18 @@ class PlannerService:
         # Adjust so the total matches exactly
         clamped = self._adjust_total(clamped, int(total_minutes), scored)
 
-        # Build rows — no consecutive same-subject (shuffle by score order)
+        # Build rows — ordered highest-time first
         rows: list[PlanRow] = []
-        prev_subject = None
         ordered = sorted(clamped.items(), key=lambda kv: -kv[1])
 
         for name, minutes in ordered:
             if minutes <= 0:
                 continue
-            # Simple no-consecutive check: if conflict, move to end
-            if name == prev_subject:
-                rows.append({"day_of_week": day, "subject_name": name,
-                              "study_time_minutes": minutes})
-            else:
-                rows.insert(0, {"day_of_week": day, "subject_name": name,
-                                 "study_time_minutes": minutes})
-            prev_subject = name
+            rows.append({
+                "day_of_week": day,
+                "subject_name": name,
+                "study_time_minutes": minutes,
+            })
 
         return rows
 

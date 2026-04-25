@@ -21,9 +21,16 @@ def main() -> None:
             f"Could not find app entrypoint at: {app_main}"
         )
 
-    sys.path.insert(0, str(app_main.parent))
+    app_dir = str(app_main.parent)
+    if app_dir not in sys.path:
+        sys.path.insert(0, app_dir)
+
     runpy.run_path(str(app_main), run_name="__main__")
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except KeyboardInterrupt:
+        print("\n\n     Interrupted. Goodbye!")
+        sys.exit(0)
