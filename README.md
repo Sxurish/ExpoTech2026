@@ -7,6 +7,16 @@ and exam urgency.
 
 ---
 
+## Why there are two `main.py` files
+
+- `main.py` (repository root): lightweight launcher so you can run `python main.py`
+  from the project root.
+- `ExpoTech 2026/files/main.py`: real CLI application entry point with all app logic.
+
+They are intentionally different and **not duplicated business logic**.
+
+---
+
 ## Project Structure
 
 ```

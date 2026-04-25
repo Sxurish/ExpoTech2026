@@ -1,5 +1,12 @@
 # Como rodar o projeto agora
 
+## Sobre os dois `main.py`
+
+- `main.py` na raiz é apenas um **launcher** para facilitar execução com `python main.py`.
+- `ExpoTech 2026/files/main.py` é o **entrypoint real** da aplicação CLI.
+
+Ou seja: não há lógica duplicada entre eles; o arquivo da raiz só delega para o principal.
+
 ## 1) Entrar na pasta correta
 
 ```bash
