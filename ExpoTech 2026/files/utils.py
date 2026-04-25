@@ -60,9 +60,9 @@ def prompt_int(label: str, min_val: int, max_val: int) -> int:
             val = int(raw)
             if min_val <= val <= max_val:
                 return val
-            error(f"Please enter a number between {min_val} and {max_val}.")
+            error(f"Por favor, digite um número entre {min_val} e {max_val}.")
         except ValueError:
-            error("Please enter a valid integer.")
+            error("Por favor, digite um número inteiro válido.")
 
 
 def prompt_float(label: str, min_val: float, max_val: float) -> float:
@@ -72,13 +72,14 @@ def prompt_float(label: str, min_val: float, max_val: float) -> float:
             val = float(raw)
             if min_val <= val <= max_val:
                 return val
-            error(f"Please enter a number between {min_val} and {max_val}.")
+            error(f"Por favor, digite um número entre {min_val} e {max_val}.")
         except ValueError:
-            error("Please enter a valid number.")
+            error("Por favor, digite um número válido.")
 
 
-def prompt_password(label: str = "Password") -> str:
-    return getpass.getpass(f"  {label}: ")
+def prompt_password(label: str = "Senha") -> str:
+    # Usando input() simples para compatibilidade com todos os terminais Windows
+    return input(f"  {label}: ")
 
 
 def clear() -> None:

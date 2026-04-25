@@ -54,7 +54,7 @@ class StudyPlannerApp:
 
     def _bootstrap_db(self) -> None:
         if not self._db.test_connection():
-            error("Cannot connect to MySQL. Check your .env file and try again.")
+            error("Não foi possível conectar ao MySQL. Verifique seu arquivo .env e tente novamente.")
             sys.exit(1)
         self._db.create_all_tables()
 
@@ -72,32 +72,32 @@ class StudyPlannerApp:
     # Auth menu
     # ======================================================================
     def _show_auth_menu(self) -> None:
-        banner("Study Planner  ·  Welcome")
+        banner("Planejador de Estudos  ·  Bem-vindo")
         print()
-        print("  1. Register")
-        print("  2. Login")
-        print("  0. Exit")
+        print("  1. Cadastrar")
+        print("  2. Entrar")
+        print("  0. Sair")
         print()
-        choice = prompt("Choose an option")
+        choice = prompt("Escolha uma opção")
 
         if choice == "1":
             self._register()
         elif choice == "2":
             self._login()
         elif choice == "0":
-            info("Goodbye! 👋")
+            info("Adeus! 👋")
             sys.exit(0)
         else:
-            error("Invalid option.")
+            error("Opção inválida.")
 
     def _register(self) -> None:
-        section("Create Account")
-        full_name      = prompt("Full name")
-        email          = prompt("Email")
-        password       = prompt_password("Password (min 6 chars)")
-        confirm        = prompt_password("Confirm password")
-        education_lvl  = prompt("Education level (e.g. Undergraduate)")
-        course         = prompt("Course / Degree name")
+        section("Criar Conta")
+        full_name      = prompt("Nome completo")
+        email          = prompt("E-mail")
+        password       = prompt_password("Senha (mín 6 caracteres)")
+        confirm        = prompt_password("Confirmar senha")
+        education_lvl  = prompt("Nível de escolaridade (ex: Graduação)")
+        course         = prompt("Curso / Graduação")
 
         with self._db.get_session() as session:
             try:
@@ -110,13 +110,13 @@ class StudyPlannerApp:
                     education_level=education_lvl,
                     course=course,
                 )
-                success(f"Account created! Welcome, {user.full_name}. Please log in.")
+                success(f"Conta criada! Bem-vindo, {user.full_name}. Por favor, entre.")
             except (AuthValidationError, DuplicateEmailError) as exc:
                 error(str(exc))
 
     def _login(self) -> None:
-        section("Login")
-        email    = prompt("Email")
+        section("Entrar")
+        email    = prompt("E-mail")
         password = prompt_password()
 
         with self._db.get_session() as session:
@@ -125,7 +125,7 @@ class StudyPlannerApp:
                 # Detach so we can use the object outside the session
                 session.expunge(user)
                 self._current_user = user
-                success(f"Welcome back, {user.full_name}!")
+                success(f"Bem-vindo de volta, {user.full_name}!")
             except (AuthValidationError, InvalidCredentialsError) as exc:
                 error(str(exc))
 
@@ -134,17 +134,17 @@ class StudyPlannerApp:
     # ======================================================================
     def _show_app_menu(self) -> None:
         assert self._current_user is not None
-        banner(f"Study Planner  ·  {self._current_user.full_name}")
+        banner(f"Planejador de Estudos  ·  {self._current_user.full_name}")
         print()
-        print("  1. Add subject")
-        print("  2. View my subjects")
-        print("  3. Generate study plan")
-        print("  4. View study plan")
-        print("  5. Delete a subject")
-        print("  6. Logout")
-        print("  0. Exit")
+        print("  1. Adicionar matéria")
+        print("  2. Ver minhas matérias")
+        print("  3. Gerar plano de estudos")
+        print("  4. Ver plano de estudos")
+        print("  5. Excluir uma matéria")
+        print("  6. Sair")
+        print("  0. Sair")
         print()
-        choice = prompt("Choose an option")
+        choice = prompt("Escolha uma opção")
 
         dispatch = {
             "1": self._add_subject,
@@ -166,11 +166,11 @@ class StudyPlannerApp:
     # Subjects
     # ======================================================================
     def _add_subject(self) -> None:
-        section("Add Subject")
-        name       = prompt("Subject name")
-        difficulty = prompt_int("Difficulty", 1, 5)
-        priority   = prompt_int("Priority", 1, 5)
-        exam_date  = prompt("Exam date (YYYY-MM-DD)")
+        section("Adicionar Matéria")
+        name       = prompt("Nome da matéria")
+        difficulty = prompt_int("Dificuldade", 1, 5)
+        priority   = prompt_int("Prioridade", 1, 5)
+        exam_date  = prompt("Data da prova (AAAA-MM-DD)")
 
         with self._db.get_session() as session:
             try:
@@ -182,23 +182,23 @@ class StudyPlannerApp:
                     priority=priority,
                     exam_date_str=exam_date,
                 )
-                success(f"Subject '{subj.name}' saved!")
+                success(f"Matéria '{subj.name}' salva!")
             except SubjectValidationError as exc:
                 error(str(exc))
 
     def _view_subjects(self) -> None:
-        section("My Subjects")
+        section("Minhas Matérias")
         with self._db.get_session() as session:
             subjects = self._subject_svc.get_subjects_for_user(
                 session, self._current_user.id  # type: ignore[union-attr]
             )
 
         if not subjects:
-            info("No subjects yet. Add some first.")
+            info("Nenhuma matéria ainda. Adicione algumas primeiro.")
             return
 
         print(
-            f"\n  {'#':<4} {'Name':<25} {'Diff':>4} {'Prio':>4} {'Exam Date':>12}"
+            f"\n  {'#':<4} {'Nome':<25} {'Dif':>4} {'Pri':>4} {'Data da Prova':>12}"
         )
         print("  " + "-" * 54)
         for i, s in enumerate(subjects, 1):
@@ -208,18 +208,18 @@ class StudyPlannerApp:
             )
 
     def _delete_subject(self) -> None:
-        section("Delete Subject")
+        section("Excluir Matéria")
         with self._db.get_session() as session:
             subjects = self._subject_svc.get_subjects_for_user(
                 session, self._current_user.id  # type: ignore[union-attr]
             )
 
         if not subjects:
-            info("No subjects to delete.")
+            info("Nenhuma matéria para excluir.")
             return
 
         self._view_subjects()
-        idx = prompt_int("Enter subject number to delete", 1, len(subjects))
+        idx = prompt_int("Digite o número da matéria para excluir", 1, len(subjects))
         target = subjects[idx - 1]
 
         with self._db.get_session() as session:
@@ -227,24 +227,24 @@ class StudyPlannerApp:
                 session, target.id, self._current_user.id  # type: ignore[union-attr]
             )
         if ok:
-            success(f"Subject '{target.name}' deleted.")
+            success(f"Matéria '{target.name}' excluída.")
         else:
-            error("Subject not found.")
+            error("Matéria não encontrada.")
 
     # ======================================================================
     # Study plan
     # ======================================================================
     def _generate_plan(self) -> None:
-        section("Generate Study Plan")
-        hours_per_day = prompt_float("Hours available per day", 0.5, 16)
-        days_per_week = prompt_int("Days available per week", 1, 7)
+        section("Gerar Plano de Estudos")
+        hours_per_day = prompt_float("Horas disponíveis por dia", 0.5, 16)
+        days_per_week = prompt_int("Dias disponíveis por semana", 1, 7)
 
         with self._db.get_session() as session:
             subjects = self._subject_svc.get_subjects_for_user(
                 session, self._current_user.id  # type: ignore[union-attr]
             )
             if not subjects:
-                error("Add subjects before generating a plan.")
+                error("Adicione matérias antes de gerar um plano.")
                 return
 
             try:
@@ -255,20 +255,20 @@ class StudyPlannerApp:
                     hours_per_day=hours_per_day,
                     days_per_week=days_per_week,
                 )
-                success("Study plan generated and saved!")
+                success("Plano de estudos gerado e salvo!")
                 self._print_plan(plan)
             except ValueError as exc:
                 error(str(exc))
 
     def _view_plan(self) -> None:
-        section("My Study Plan")
+        section("Meu Plano de Estudos")
         with self._db.get_session() as session:
             plan = self._planner_svc.get_saved_plan(
                 session, self._current_user.id  # type: ignore[union-attr]
             )
 
         if not plan:
-            info("No study plan found. Generate one first.")
+            info("Nenhum plano de estudos encontrado. Gere um primeiro.")
             return
 
         self._print_plan(plan)
@@ -291,12 +291,12 @@ class StudyPlannerApp:
     # Session management
     # ======================================================================
     def _logout(self) -> None:
-        info(f"Goodbye, {self._current_user.full_name}!")  # type: ignore[union-attr]
+        info(f"Adeus, {self._current_user.full_name}!")  # type: ignore[union-attr]
         self._current_user = None
 
     @staticmethod
     def _exit() -> None:
-        info("Goodbye! 👋")
+        info("Adeus! 👋")
         sys.exit(0)
 
 
@@ -309,5 +309,5 @@ if __name__ == "__main__":
         app.run()
     except KeyboardInterrupt:
         print("\n")
-        info("Interrupted. Goodbye!")
+        info("Interrompido. Adeus!")
         sys.exit(0)

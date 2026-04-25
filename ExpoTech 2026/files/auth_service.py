@@ -85,7 +85,7 @@ class AuthService:
             # Flush failures leave the Session transaction in an invalid state.
             # Explicit rollback is required before the Session can be reused.
             session.rollback()
-            raise DuplicateEmailError(f"Email '{email}' is already registered.")
+            raise DuplicateEmailError(f"E-mail '{email}' já está cadastrado.")
 
         return user
 
@@ -95,14 +95,14 @@ class AuthService:
     def login(self, session: Session, *, email: str, password: str) -> User:
         """Verify credentials and return the User object."""
         if not email or not password:
-            raise ValidationError("Email and password are required.")
+            raise ValidationError("E-mail e senha são obrigatórios.")
 
         user: User | None = (
             session.query(User).filter_by(email=email.strip().lower()).first()
         )
 
         if user is None or not bcrypt.checkpw(password.encode(), user.password.encode()):
-            raise InvalidCredentialsError("Invalid email or password.")
+            raise InvalidCredentialsError("E-mail ou senha inválidos.")
 
         return user
 
@@ -120,21 +120,21 @@ class AuthService:
         course: str,
     ) -> None:
         if not full_name or not full_name.strip():
-            raise ValidationError("Full name is required.")
+            raise ValidationError("Nome completo é obrigatório.")
 
         if not self._EMAIL_RE.match(email.strip()):
-            raise ValidationError(f"'{email}' is not a valid email address.")
+            raise ValidationError(f"'{email}' não é um endereço de e-mail válido.")
 
         if len(password) < self._MIN_PASSWORD_LEN:
             raise ValidationError(
-                f"Password must be at least {self._MIN_PASSWORD_LEN} characters."
+                f"A senha deve ter pelo menos {self._MIN_PASSWORD_LEN} caracteres."
             )
 
         if password != confirm_password:
-            raise ValidationError("Passwords do not match.")
+            raise ValidationError("As senhas não coincidem.")
 
         if not education_level or not education_level.strip():
-            raise ValidationError("Education level is required.")
+            raise ValidationError("Nível de escolaridade é obrigatório.")
 
         if not course or not course.strip():
-            raise ValidationError("Course is required.")
+            raise ValidationError("Curso é obrigatório.")

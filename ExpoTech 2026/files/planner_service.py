@@ -72,13 +72,13 @@ class PlannerService:
         Returns {day_name: [PlanRow, ...]}
         """
         if not subjects:
-            raise ValueError("No subjects found. Please add subjects first.")
+            raise ValueError("Nenhuma matéria encontrada. Por favor, adicione matérias primeiro.")
 
         if not (0.5 <= hours_per_day <= 16):
-            raise ValueError("Hours per day must be between 0.5 and 16.")
+            raise ValueError("Horas por dia devem estar entre 0.5 e 16.")
 
         if not (1 <= days_per_week <= 7):
-            raise ValueError("Days per week must be between 1 and 7.")
+            raise ValueError("Dias por semana devem estar entre 1 e 7.")
 
         # --- score every subject ---
         scored = self._score_subjects(subjects)

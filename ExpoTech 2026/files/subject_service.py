@@ -102,20 +102,20 @@ class SubjectService:
         exam_date_str: str,
     ) -> None:
         if not name or not name.strip():
-            raise SubjectValidationError("Subject name is required.")
+            raise SubjectValidationError("Nome da matéria é obrigatório.")
 
         if not (1 <= difficulty <= 5):
-            raise SubjectValidationError("Difficulty must be between 1 and 5.")
+            raise SubjectValidationError("Dificuldade deve estar entre 1 e 5.")
 
         if not (1 <= priority <= 5):
-            raise SubjectValidationError("Priority must be between 1 and 5.")
+            raise SubjectValidationError("Prioridade deve estar entre 1 e 5.")
 
         try:
             parsed = date.fromisoformat(exam_date_str)
         except ValueError:
             raise SubjectValidationError(
-                f"Invalid date '{exam_date_str}'. Use YYYY-MM-DD format."
+                f"Data da prova inválida: {exam_date_str}. Use o formato AAAA-MM-DD."
             )
 
         if parsed < date.today():
-            raise SubjectValidationError("Exam date cannot be in the past.")
+            raise SubjectValidationError("Data da prova não pode ser no passado.")
