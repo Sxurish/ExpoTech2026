@@ -82,6 +82,9 @@ class AuthService:
             session.add(user)
             session.flush()   # triggers FK/unique checks before commit
         except IntegrityError:
+            # Flush failures leave the Session transaction in an invalid state.
+            # Explicit rollback is required before the Session can be reused.
+            session.rollback()
             raise DuplicateEmailError(f"Email '{email}' is already registered.")
 
         return user

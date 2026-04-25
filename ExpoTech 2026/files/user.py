@@ -47,3 +47,10 @@ class User(Base):
             "education_level": self.education_level,
             "course": self.course,
         }
+
+
+# Ensure related mapped classes are registered when importing only `User`.
+# This avoids mapper initialization errors in contexts that use AuthService
+# without importing other model modules first.
+from subject import Subject  # noqa: E402,F401
+from study_plan import StudyPlan  # noqa: E402,F401
