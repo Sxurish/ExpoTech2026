@@ -1,9 +1,12 @@
-[README.md](https://github.com/user-attachments/files/26879191/README.md)
-# 📚 Study Planner — Python + MySQL CLI Application
+# Study Planner — Python + MySQL (CLI + Web)
 
-A production-ready, modular Study Planner that automatically generates
-personalised weekly study schedules based on subject difficulty, priority,
-and exam urgency.
+A modular Study Planner that automatically generates personalised weekly
+study schedules based on subject difficulty, priority, and exam urgency.
+
+Two entry points share the **same business-logic core**:
+
+- **CLI** — `python main.py`
+- **Web (Flask)** — `python "ExpoTech 2026/files/api.py"` and open `http://localhost:5000`
 
 ---
 
@@ -20,8 +23,11 @@ They are intentionally different and **not duplicated business logic**.
 ## Project Structure
 
 ```
-files/
+ExpoTech 2026/files/
 ├── main.py                    # CLI entry point
+├── api.py                     # Flask web API (consumes the same services)
+├── templates/
+│   └── index.html             # Single-page front-end
 ├── auth_service.py            # Registration & login (bcrypt)
 ├── subject_service.py         # CRUD + validation for subjects
 ├── planner_service.py         # Plan generation algorithm + persistence
@@ -31,6 +37,7 @@ files/
 ├── study_plan.py              # StudyPlan ORM model
 ├── utils.py                   # CLI helpers, coloured output
 ├── schema.sql                 # Raw SQL schema (reference only)
+├── .env.example               # Template for .env
 └── requirements.txt
 ```
 
@@ -106,15 +113,35 @@ DB_PASSWORD=your_password
 
 ### 6. Run the application
 
-```bash
-python main.py
-```
-
-From the repository root, you can also run:
+**CLI mode:**
 
 ```bash
-python main.py
+python main.py                 # from repo root
+# or
+python "ExpoTech 2026/files/main.py"
 ```
+
+**Web mode (Flask):**
+
+```bash
+cd "ExpoTech 2026/files"
+python api.py
+# open http://localhost:5000
+```
+
+The web API endpoints:
+
+| Method | Path | Description |
+|---|---|---|
+| GET | `/` | Serves the SPA |
+| POST | `/api/register` | Create account |
+| POST | `/api/login` | Authenticate |
+| GET | `/api/subjects` | List user's subjects (needs `X-User-Id`) |
+| POST | `/api/subjects` | Create subject |
+| DELETE | `/api/subjects/<id>` | Delete subject |
+| POST | `/api/generate-plan` | Generate weekly plan |
+| GET | `/api/plan` | Read last saved plan |
+| GET | `/api/health` | DB ping |
 
 ---
 

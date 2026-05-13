@@ -1,0 +1,39 @@
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+
+# --- Virtualenvs ---
+.venv/
+venv/
+env/
+ENV/
+source/
+source/**
+
+# --- Environment & secrets ---
+.env
+.env.*
+!.env.example
+
+# --- Local DB / artifacts ---
+*.db
+*.sqlite
+*.sqlite3
+study_planner.db
+
+# --- IDE / OS ---
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# --- Node (for the package.json that ships under ExpoTech 2026/) ---
+node_modules/
+package-lock.json
+
+# --- Logs ---
+*.log
