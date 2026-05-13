@@ -1,66 +1,68 @@
 # Study Planner — Python + MySQL (CLI + Web)
 
-A modular Study Planner that automatically generates personalised weekly
-study schedules based on subject difficulty, priority, and exam urgency.
+Planejador de estudos modular que gera, de forma automática, um cronograma
+semanal personalizado com base na dificuldade, prioridade e urgência da
+prova de cada matéria.
 
-Two entry points share the **same business-logic core**:
+Dois pontos de entrada compartilham o **mesmo núcleo de regras de negócio**:
 
 - **CLI** — `python main.py`
-- **Web (Flask)** — `python "ExpoTech 2026/files/api.py"` and open `http://localhost:5000`
+- **Web (Flask)** — `python "ExpoTech 2026/files/api.py"` e abra `http://localhost:5000`
 
 ---
 
-## Why there are two `main.py` files
+## Por que existem dois arquivos `main.py`
 
-- `main.py` (repository root): lightweight launcher so you can run `python main.py`
-  from the project root.
-- `ExpoTech 2026/files/main.py`: real CLI application entry point with all app logic.
+- `main.py` (raiz do repositório): launcher leve para você rodar `python main.py`
+  direto da pasta raiz do projeto.
+- `ExpoTech 2026/files/main.py`: entry point real da aplicação CLI, com toda a
+  lógica.
 
-They are intentionally different and **not duplicated business logic**.
+São **intencionalmente diferentes** e **não duplicam regra de negócio**.
 
 ---
 
-## Project Structure
+## Estrutura do projeto
 
 ```
 ExpoTech 2026/files/
-├── main.py                    # CLI entry point
-├── api.py                     # Flask web API (consumes the same services)
+├── main.py                    # Entry point da CLI
+├── api.py                     # API web em Flask (consome os mesmos services)
 ├── templates/
-│   └── index.html             # Single-page front-end
-├── auth_service.py            # Registration & login (bcrypt)
-├── subject_service.py         # CRUD + validation for subjects
-├── planner_service.py         # Plan generation algorithm + persistence
-├── connection.py              # SQLAlchemy engine + session factory
-├── user.py                    # User ORM model
-├── subject.py                 # Subject ORM model
-├── study_plan.py              # StudyPlan ORM model
-├── utils.py                   # CLI helpers, coloured output
-├── schema.sql                 # Raw SQL schema (reference only)
-├── .env.example               # Template for .env
+│   └── index.html             # Front-end single-page
+├── auth_service.py            # Cadastro e login (bcrypt)
+├── subject_service.py         # CRUD + validação de matérias
+├── planner_service.py         # Algoritmo de geração do plano + persistência
+├── connection.py              # Engine SQLAlchemy + session factory
+├── user.py                    # Model ORM de usuário
+├── subject.py                 # Model ORM de matéria
+├── study_plan.py              # Model ORM do plano de estudos
+├── utils.py                   # Helpers da CLI (output colorido, prompts)
+├── schema.sql                 # Schema SQL bruto (referência)
+├── .env.example               # Template do .env
 └── requirements.txt
 ```
 
 ---
 
-## Prerequisites
+## Pré-requisitos
 
-| Requirement | Version |
+| Requisito | Versão |
 |---|---|
 | Python | 3.10 + |
 | MySQL  | 8.0 + |
 
 ---
 
-## Setup
+## Instalação
 
-### 1. Clone / Download the project
+### 1. Entre na pasta do projeto
 
 ```bash
 cd "ExpoTech 2026/files"
 ```
 
-### 2. Create a virtual environment
+### 2. Crie um ambiente virtual
 
 ```bash
 python -m venv .venv
@@ -72,15 +74,15 @@ source .venv/bin/activate
 .venv\Scripts\activate
 ```
 
-### 3. Install dependencies
+### 3. Instale as dependências
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### 4. Create the MySQL database
+### 4. Crie o banco MySQL
 
-Log into MySQL and run:
+Entre no MySQL e rode:
 
 ```sql
 CREATE DATABASE IF NOT EXISTS study_planner
@@ -88,123 +90,123 @@ CREATE DATABASE IF NOT EXISTS study_planner
     COLLATE utf8mb4_unicode_ci;
 ```
 
-The application creates all tables automatically on first run.
-If you prefer to run the schema manually:
+As tabelas são criadas automaticamente na primeira execução da aplicação.
+Se preferir aplicar o schema manualmente:
 
 ```bash
 mysql -u root -p study_planner < schema.sql
 ```
 
-### 5. Configure environment variables
+### 5. Configure as variáveis de ambiente
 
 ```bash
 cp .env.example .env
 ```
 
-Edit `.env` with your MySQL credentials:
+Edite o `.env` com suas credenciais do MySQL:
 
 ```env
 DB_HOST=localhost
 DB_PORT=3306
 DB_NAME=study_planner
 DB_USER=root
-DB_PASSWORD=your_password
+DB_PASSWORD=sua_senha
 ```
 
-### 6. Run the application
+### 6. Rode a aplicação
 
-**CLI mode:**
+**Modo CLI:**
 
 ```bash
-python main.py                 # from repo root
-# or
+python main.py                 # a partir da raiz do repositório
+# ou
 python "ExpoTech 2026/files/main.py"
 ```
 
-**Web mode (Flask):**
+**Modo Web (Flask):**
 
 ```bash
 cd "ExpoTech 2026/files"
 python api.py
-# open http://localhost:5000
+# abra http://localhost:5000
 ```
 
-The web API endpoints:
+Endpoints da API web:
 
-| Method | Path | Description |
+| Método | Rota | Descrição |
 |---|---|---|
-| GET | `/` | Serves the SPA |
-| POST | `/api/register` | Create account |
-| POST | `/api/login` | Authenticate |
-| GET | `/api/subjects` | List user's subjects (needs `X-User-Id`) |
-| POST | `/api/subjects` | Create subject |
-| DELETE | `/api/subjects/<id>` | Delete subject |
-| POST | `/api/generate-plan` | Generate weekly plan |
-| GET | `/api/plan` | Read last saved plan |
-| GET | `/api/health` | DB ping |
+| GET    | `/`                      | Serve a SPA |
+| POST   | `/api/register`          | Cria conta |
+| POST   | `/api/login`             | Autentica |
+| GET    | `/api/subjects`          | Lista as matérias do usuário (requer `X-User-Id`) |
+| POST   | `/api/subjects`          | Cria matéria |
+| DELETE | `/api/subjects/<id>`     | Remove matéria |
+| POST   | `/api/generate-plan`     | Gera plano semanal |
+| GET    | `/api/plan`              | Lê o último plano salvo |
+| GET    | `/api/health`            | Ping do banco |
 
 ---
 
-## Features
+## Funcionalidades
 
-| Feature | Detail |
+| Recurso | Detalhe |
 |---|---|
-| Register / Login | bcrypt-hashed passwords, email validation |
-| Add Subjects | Name, Difficulty (1–5), Priority (1–5), Exam Date |
-| Generate Plan | Urgency + score algorithm, proportional time distribution |
-| View Plan | Coloured weekly schedule with totals |
-| Delete Subject | Remove a subject and regenerate the plan |
-| Data Persistence | All data stored in MySQL between sessions |
-| SQL Injection safe | SQLAlchemy ORM with parameterised queries |
+| Cadastro / Login | Senhas com hash bcrypt e validação de e-mail |
+| Cadastrar matérias | Nome, Dificuldade (1–5), Prioridade (1–5), Data da prova |
+| Gerar plano | Algoritmo de urgência + score com distribuição proporcional de tempo |
+| Visualizar plano | Cronograma semanal colorido (CLI) ou em cards (Web) |
+| Excluir matéria | Remove uma matéria e regenera o plano |
+| Persistência | Dados gravados no MySQL entre sessões |
+| Seguro contra SQL Injection | ORM SQLAlchemy com queries parametrizadas |
 
 ---
 
-## Algorithm
+## Algoritmo
 
-### 1. Urgency Weight
+### 1. Peso de urgência
 
-| Days until exam | Weight |
+| Dias até a prova | Peso |
 |---|---|
-| 0 – 3 | 5 (Very Urgent) |
+| 0 – 3 | 5 (Muito urgente) |
 | 4 – 7 | 4 |
 | 8 – 14 | 3 |
 | 15 + | 1 |
 
-### 2. Composite Score
+### 2. Score composto
 
 ```
-Score = (Urgency × 0.5) + (Difficulty × 0.3) + (Priority × 0.2)
+Score = (Urgência × 0,5) + (Dificuldade × 0,3) + (Prioridade × 0,2)
 ```
 
-### 3. Time Distribution
+### 3. Distribuição do tempo
 
 ```
-TimePerSubject = (Score / TotalScore) × DailyMinutes
+TempoPorMatéria = (Score / SomaDosScores) × MinutosDoDia
 ```
 
-### 4. Constraints
+### 4. Restrições
 
-- Minimum **30 min** per subject per day
-- Maximum **120 min** per subject per day
-- Time rounded to nearest **30 min**
-- Total daily time adjusted to exactly match available hours
-- No two consecutive blocks of the same subject
+- Mínimo de **30 min** por matéria por dia
+- Máximo de **120 min** por matéria por dia
+- Tempo arredondado para o múltiplo de **30 min** mais próximo
+- Total diário ajustado para bater exatamente com as horas disponíveis
+- Sem blocos consecutivos da mesma matéria
 
 ---
 
-## Architecture Notes
+## Notas de arquitetura
 
-- **Clean separation of concerns** — business logic lives entirely in `services/`,
-  CLI interaction in `main.py` / `cli/`, data access via SQLAlchemy ORM.
-- **Flask-ready** — `AuthService`, `SubjectService`, and `PlannerService`
-  accept a SQLAlchemy `Session` via dependency injection; they can be called
-  identically from a Flask route.
-- **No raw SQL** — all queries go through the ORM, preventing SQL injection.
-- **Environment-based config** — no credentials in source code.
+- **Separação de responsabilidades** — a regra de negócio vive inteiramente em
+  `services/`, a interação CLI em `main.py`, o acesso a dados via ORM SQLAlchemy.
+- **Pronto para Flask** — `AuthService`, `SubjectService` e `PlannerService`
+  recebem uma `Session` do SQLAlchemy via injeção de dependência, podendo ser
+  chamados de uma rota Flask sem alteração.
+- **Sem SQL bruto** — todas as queries passam pelo ORM, prevenindo SQL injection.
+- **Configuração via ambiente** — nenhuma credencial no código-fonte.
 
 ---
 
-## Running Tests (optional)
+## Rodando testes (opcional)
 
 ```bash
 pip install pytest
@@ -213,10 +215,10 @@ pytest tests/
 
 ---
 
-## Security Checklist
+## Checklist de segurança
 
-- [x] Passwords hashed with `bcrypt`
-- [x] SQL Injection prevented via SQLAlchemy ORM
-- [x] Credentials loaded from `.env` (never hardcoded)
-- [x] Email uniqueness enforced at DB level
-- [x] Input validation before any DB write
+- [x] Senhas com hash via `bcrypt`
+- [x] SQL Injection bloqueado pelo ORM SQLAlchemy
+- [x] Credenciais carregadas do `.env` (nunca no código)
+- [x] Unicidade de e-mail garantida no nível do banco
+- [x] Validação de entrada antes de qualquer escrita no banco
