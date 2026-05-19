@@ -1,4 +1,4 @@
-# Study Planner — Python + MySQL (CLI + Web)
+# Study Planner — Python + Supabase (CLI + Web + Vercel)
 
 Planejador de estudos modular que gera, de forma automática, um cronograma
 semanal personalizado com base na dificuldade, prioridade e urgência da
@@ -7,157 +7,113 @@ prova de cada matéria.
 Dois pontos de entrada compartilham o **mesmo núcleo de regras de negócio**:
 
 - **CLI** — `python main.py`
-- **Web (Flask)** — `python "ExpoTech 2026/files/api.py"` e abra `http://localhost:5000`
+- **Web (Flask local)** — `python app/api.py` e abra `http://localhost:5000`
+- **Web (Vercel)** — deploy serverless via `vercel.json` + `api/index.py`
 
----
-
-## Por que existem dois arquivos `main.py`
-
-- `main.py` (raiz do repositório): launcher leve para você rodar `python main.py`
-  direto da pasta raiz do projeto.
-- `ExpoTech 2026/files/main.py`: entry point real da aplicação CLI, com toda a
-  lógica.
-
-São **intencionalmente diferentes** e **não duplicam regra de negócio**.
+Banco: **Supabase Postgres**. Autenticação: **Supabase Auth** (`@supabase/supabase-js` no front).
 
 ---
 
 ## Estrutura do projeto
 
 ```
-ExpoTech 2026/files/
-├── main.py                    # Entry point da CLI
-├── api.py                     # API web em Flask (consome os mesmos services)
-├── templates/
-│   └── index.html             # Front-end single-page
-├── auth_service.py            # Cadastro e login (bcrypt)
-├── subject_service.py         # CRUD + validação de matérias
-├── planner_service.py         # Algoritmo de geração do plano + persistência
-├── connection.py              # Engine SQLAlchemy + session factory
-├── user.py                    # Model ORM de usuário
-├── subject.py                 # Model ORM de matéria
-├── study_plan.py              # Model ORM do plano de estudos
-├── utils.py                   # Helpers da CLI (output colorido, prompts)
-├── schema.sql                 # Schema SQL bruto (referência)
-├── .env.example               # Template do .env
-└── requirements.txt
+.
+├── main.py                  # launcher CLI (delega para app/main.py)
+├── requirements.txt         # deps que a Vercel instala
+├── vercel.json              # config de deploy serverless
+├── api/
+│   └── index.py             # entry serverless da Vercel (expõe o Flask app)
+└── app/
+    ├── api.py               # Flask: rotas /api/* + SPA
+    ├── main.py              # CLI
+    ├── connection.py        # SQLAlchemy engine (Postgres)
+    ├── supabase_client.py   # valida JWT (Authorization: Bearer)
+    ├── subject_service.py
+    ├── planner_service.py
+    ├── subject.py           # model Subject
+    ├── study_plan.py        # model StudyPlan
+    ├── utils.py             # helpers de CLI
+    ├── schema.sql           # SQL para colar no SQL Editor do Supabase
+    ├── templates/index.html # SPA single-page
+    ├── requirements.txt     # deps usadas localmente (espelha a da raiz)
+    └── .env.example
 ```
 
 ---
 
 ## Pré-requisitos
 
-| Requisito | Versão |
-|---|---|
-| Python | 3.10 + |
-| MySQL  | 8.0 + |
+- Python 3.10+
+- Conta Supabase com um projeto criado
+- (Para deploy) conta Vercel
 
 ---
 
-## Instalação
+## 1) Preparar o Supabase
 
-### 1. Entre na pasta do projeto
+1. Vá no SQL Editor do projeto e cole o conteúdo de `app/schema.sql`. Clique em **Run**.
+   - Cria as tabelas `subjects` e `study_plans` (uuid → `auth.users`)
+   - Habilita RLS com policies `auth.uid() = user_id`
+2. Em **Project Settings → API**, copie:
+   - `Project URL` → `SUPABASE_URL`
+   - `anon` `public` key → `SUPABASE_ANON_KEY`
+3. Em **Project Settings → Database → Connection pooler** (modo **Transaction**, porta **6543**), copie a Connection String → `DATABASE_URL`. Substitua `[YOUR-PASSWORD]` pela senha do banco.
+
+> **Por que o pooler?** Cold starts serverless abrem/fecham conexões a todo
+> instante; usar o pooler do Supabase (PgBouncer) evita esgotar conexões.
+
+---
+
+## 2) Rodar localmente
 
 ```bash
-cd "ExpoTech 2026/files"
-```
-
-### 2. Crie um ambiente virtual
-
-```bash
+cd app
 python -m venv .venv
-
-# macOS / Linux
-source .venv/bin/activate
-
-# Windows
-.venv\Scripts\activate
-```
-
-### 3. Instale as dependências
-
-```bash
+source .venv/bin/activate                # Linux/macOS
+# .venv\Scripts\activate                # Windows
 pip install -r requirements.txt
+cp .env.example .env                     # preencha DATABASE_URL, SUPABASE_URL, SUPABASE_ANON_KEY
+python api.py                            # abre http://localhost:5000
 ```
 
-### 4. Crie o banco MySQL
-
-Entre no MySQL e rode:
-
-```sql
-CREATE DATABASE IF NOT EXISTS study_planner
-    CHARACTER SET utf8mb4
-    COLLATE utf8mb4_unicode_ci;
-```
-
-As tabelas são criadas automaticamente na primeira execução da aplicação.
-Se preferir aplicar o schema manualmente:
+CLI:
 
 ```bash
-mysql -u root -p study_planner < schema.sql
+cd ..
+python main.py
 ```
-
-### 5. Configure as variáveis de ambiente
-
-```bash
-cp .env.example .env
-```
-
-Edite o `.env` com suas credenciais do MySQL:
-
-```env
-DB_HOST=localhost
-DB_PORT=3306
-DB_NAME=study_planner
-DB_USER=root
-DB_PASSWORD=sua_senha
-```
-
-### 6. Rode a aplicação
-
-**Modo CLI:**
-
-```bash
-python main.py                 # a partir da raiz do repositório
-# ou
-python "ExpoTech 2026/files/main.py"
-```
-
-**Modo Web (Flask):**
-
-```bash
-cd "ExpoTech 2026/files"
-python api.py
-# abra http://localhost:5000
-```
-
-Endpoints da API web:
-
-| Método | Rota | Descrição |
-|---|---|---|
-| GET    | `/`                      | Serve a SPA |
-| POST   | `/api/register`          | Cria conta |
-| POST   | `/api/login`             | Autentica |
-| GET    | `/api/subjects`          | Lista as matérias do usuário (requer `X-User-Id`) |
-| POST   | `/api/subjects`          | Cria matéria |
-| DELETE | `/api/subjects/<id>`     | Remove matéria |
-| POST   | `/api/generate-plan`     | Gera plano semanal |
-| GET    | `/api/plan`              | Lê o último plano salvo |
-| GET    | `/api/health`            | Ping do banco |
 
 ---
 
-## Funcionalidades
+## 3) Deploy na Vercel
 
-| Recurso | Detalhe |
-|---|---|
-| Cadastro / Login | Senhas com hash bcrypt e validação de e-mail |
-| Cadastrar matérias | Nome, Dificuldade (1–5), Prioridade (1–5), Data da prova |
-| Gerar plano | Algoritmo de urgência + score com distribuição proporcional de tempo |
-| Visualizar plano | Cronograma semanal colorido (CLI) ou em cards (Web) |
-| Excluir matéria | Remove uma matéria e regenera o plano |
-| Persistência | Dados gravados no MySQL entre sessões |
-| Seguro contra SQL Injection | ORM SQLAlchemy com queries parametrizadas |
+1. Importe o repositório na Vercel (**New Project**).
+2. Em **Environment Variables**, configure:
+   - `DATABASE_URL`
+   - `SUPABASE_URL`
+   - `SUPABASE_ANON_KEY`
+3. Deploy. A Vercel detecta `vercel.json` + `requirements.txt` automaticamente e
+   constrói `api/index.py` como função Python.
+
+A rota `/(.*)` é redirecionada para o handler Flask em `api/index.py`, que serve
+tanto a SPA (`/`) quanto os endpoints (`/api/*`).
+
+---
+
+## Endpoints da API
+
+| Método | Rota                  | Auth | Descrição |
+|---|---|---|---|
+| GET    | `/`                   | —    | Serve a SPA |
+| GET    | `/api/health`         | —    | Ping do banco |
+| GET    | `/api/subjects`       | Bearer | Lista matérias |
+| POST   | `/api/subjects`       | Bearer | Cria matéria |
+| DELETE | `/api/subjects/<id>`  | Bearer | Remove matéria |
+| POST   | `/api/generate-plan`  | Bearer | Gera plano semanal |
+| GET    | `/api/plan`           | Bearer | Lê último plano salvo |
+
+> Auth = header `Authorization: Bearer <access_token>` do Supabase. O front faz
+> login direto via `@supabase/supabase-js` e injeta o token nas chamadas.
 
 ---
 
@@ -178,7 +134,7 @@ Endpoints da API web:
 Score = (Urgência × 0,5) + (Dificuldade × 0,3) + (Prioridade × 0,2)
 ```
 
-### 3. Distribuição do tempo
+### 3. Distribuição
 
 ```
 TempoPorMatéria = (Score / SomaDosScores) × MinutosDoDia
@@ -186,39 +142,16 @@ TempoPorMatéria = (Score / SomaDosScores) × MinutosDoDia
 
 ### 4. Restrições
 
-- Mínimo de **30 min** por matéria por dia
-- Máximo de **120 min** por matéria por dia
-- Tempo arredondado para o múltiplo de **30 min** mais próximo
-- Total diário ajustado para bater exatamente com as horas disponíveis
-- Sem blocos consecutivos da mesma matéria
-
----
-
-## Notas de arquitetura
-
-- **Separação de responsabilidades** — a regra de negócio vive inteiramente em
-  `services/`, a interação CLI em `main.py`, o acesso a dados via ORM SQLAlchemy.
-- **Pronto para Flask** — `AuthService`, `SubjectService` e `PlannerService`
-  recebem uma `Session` do SQLAlchemy via injeção de dependência, podendo ser
-  chamados de uma rota Flask sem alteração.
-- **Sem SQL bruto** — todas as queries passam pelo ORM, prevenindo SQL injection.
-- **Configuração via ambiente** — nenhuma credencial no código-fonte.
-
----
-
-## Rodando testes (opcional)
-
-```bash
-pip install pytest
-pytest tests/
-```
+- Mínimo **30 min**, máximo **120 min** por matéria por dia
+- Arredondado para o múltiplo de **30 min** mais próximo
+- Total ajustado para bater exatamente com as horas disponíveis
 
 ---
 
 ## Checklist de segurança
 
-- [x] Senhas com hash via `bcrypt`
+- [x] Autenticação delegada ao **Supabase Auth** (sem armazenar senhas)
+- [x] **RLS** ativo em `subjects` e `study_plans` (defesa em profundidade — mesmo se a API tivesse bug, o banco isola por `auth.uid()`)
+- [x] JWT validado no backend a cada request (`Authorization: Bearer`)
+- [x] Credenciais via env vars (`DATABASE_URL`, `SUPABASE_URL`, `SUPABASE_ANON_KEY`); nenhuma no código
 - [x] SQL Injection bloqueado pelo ORM SQLAlchemy
-- [x] Credenciais carregadas do `.env` (nunca no código)
-- [x] Unicidade de e-mail garantida no nível do banco
-- [x] Validação de entrada antes de qualquer escrita no banco

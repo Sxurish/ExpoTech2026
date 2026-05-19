@@ -661,9 +661,18 @@
 </div>
 
 <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const API = '/api';
-let userId = null;
+const SUPABASE_URL = {{ supabase_url | tojson }};
+const SUPABASE_ANON_KEY = {{ supabase_anon_key | tojson }};
+
+if(!SUPABASE_URL || !SUPABASE_ANON_KEY){
+    console.error('Supabase não configurado (SUPABASE_URL / SUPABASE_ANON_KEY ausentes).');
+}
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+let currentSession = null;
 let userName = null;
 
 const toastEl = document.getElementById('toast');
@@ -755,7 +764,9 @@ document.addEventListener('keydown', e=>{
 
 function authHeaders(){
     const h = {'Content-Type':'application/json'};
-    if(userId !== null) h['X-User-Id'] = userId;
+    if(currentSession?.access_token){
+        h['Authorization'] = 'Bearer ' + currentSession.access_token;
+    }
     return h;
 }
 
@@ -800,41 +811,64 @@ document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>{
 
 document.getElementById('loginForm').addEventListener('submit', async e=>{
     e.preventDefault();
-    const fd = new FormData(e.target);
+    const fd = Object.fromEntries(new FormData(e.target));
     try{
-        const body = await api('/login', {method:'POST', body: JSON.stringify(Object.fromEntries(fd))});
-        onAuth(body.user);
-    }catch(err){ toast(err.message,'error'); }
+        const { data, error } = await supabase.auth.signInWithPassword({
+            email: fd.email, password: fd.password,
+        });
+        if(error) throw error;
+        onAuth(data.session);
+    }catch(err){ toast(err.message || 'Falha no login','error'); }
 });
 
 document.getElementById('registerForm').addEventListener('submit', async e=>{
     e.preventDefault();
-    const fd = new FormData(e.target);
+    const fd = Object.fromEntries(new FormData(e.target));
+    if(fd.password !== fd.confirm_password){
+        toast('As senhas não coincidem.', 'error'); return;
+    }
     try{
-        const body = await api('/register', {method:'POST', body: JSON.stringify(Object.fromEntries(fd))});
-        onAuth(body.user);
-        toast('Conta criada!','success');
-    }catch(err){ toast(err.message,'error'); }
+        const { data, error } = await supabase.auth.signUp({
+            email: fd.email,
+            password: fd.password,
+            options: { data: {
+                full_name: fd.full_name,
+                education_level: fd.education_level,
+                course: fd.course,
+            }},
+        });
+        if(error) throw error;
+        if(data.session){
+            onAuth(data.session);
+            toast('Conta criada!','success');
+        }else{
+            toast('Conta criada! Confirme o e-mail e faça login.', 'success');
+        }
+    }catch(err){ toast(err.message || 'Falha no cadastro','error'); }
 });
 
-document.getElementById('logoutBtn').addEventListener('click', ()=>{
-    userId = null; userName = null;
-    localStorage.removeItem('fs_user');
+document.getElementById('logoutBtn').addEventListener('click', async ()=>{
+    await supabase.auth.signOut();
+    currentSession = null; userName = null;
     document.getElementById('authScreen').classList.remove('hidden');
     document.getElementById('appScreen').classList.add('hidden');
 });
 
-function onAuth(user){
-    userId = user.id;
-    userName = user.full_name;
-    localStorage.setItem('fs_user', JSON.stringify(user));
-    document.getElementById('userName').textContent = user.full_name;
+function onAuth(session){
+    currentSession = session;
+    const meta = session.user.user_metadata || {};
+    userName = meta.full_name || session.user.email;
+    document.getElementById('userName').textContent = userName;
     document.getElementById('authScreen').classList.add('hidden');
     document.getElementById('appScreen').classList.remove('hidden');
     refreshSubjects();
     refreshPlan();
     refreshIcons();
 }
+
+supabase.auth.onAuthStateChange((_event, session)=>{
+    if(session){ currentSession = session; }
+});
 
 // ---------- Subjects ----------
 // Máscara dd/mm/aaaa
@@ -989,10 +1023,12 @@ function renderPlan(plan){
 function escapeHtml(s){return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 
 // ---------- Restore session ----------
-(function init(){
+(async function init(){
     refreshIcons();
-    const saved = localStorage.getItem('fs_user');
-    if(saved){ try{ onAuth(JSON.parse(saved)); }catch(_){} }
+    try{
+        const { data } = await supabase.auth.getSession();
+        if(data?.session) onAuth(data.session);
+    }catch(_){}
 })();
 </script>
 </body>

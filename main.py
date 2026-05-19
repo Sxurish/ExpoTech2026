@@ -14,7 +14,7 @@ from pathlib import Path
 
 def main() -> None:
     repo_root = Path(__file__).resolve().parent
-    app_main = repo_root / "ExpoTech 2026" / "files" / "main.py"
+    app_main = repo_root / "app" / "main.py"
 
     if not app_main.exists():
         raise FileNotFoundError(

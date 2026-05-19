@@ -35,5 +35,8 @@ Thumbs.db
 node_modules/
 package-lock.json
 
+# --- Vercel ---
+.vercel/
+
 # --- Logs ---
 *.log

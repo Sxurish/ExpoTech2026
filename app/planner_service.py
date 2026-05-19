@@ -62,7 +62,7 @@ class PlannerService:
         self,
         session: Session,
         *,
-        user_id: int,
+        user_id: str,
         subjects: list[Subject],
         hours_per_day: float,
         days_per_week: int,
@@ -98,7 +98,7 @@ class PlannerService:
         return plan
 
     def get_saved_plan(
-        self, session: Session, user_id: int
+        self, session: Session, user_id: str
     ) -> dict[str, list[PlanRow]]:
         """Load the most recently generated plan from the database."""
         rows: list[StudyPlan] = (
@@ -234,7 +234,7 @@ class PlannerService:
     @staticmethod
     def _save_plan(
         session: Session,
-        user_id: int,
+        user_id: str,
         plan: dict[str, list[PlanRow]],
     ) -> None:
         # Delete previous plan for this user

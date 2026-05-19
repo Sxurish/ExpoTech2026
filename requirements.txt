@@ -1,0 +1,9 @@
+# Requirements consumidos pelo runtime da Vercel.
+# (Espelha app/requirements.txt; mantenha os dois em sincronia.)
+
+SQLAlchemy==2.0.36
+psycopg2-binary==2.9.10
+supabase==2.10.0
+python-dotenv==1.0.1
+Flask==3.0.3
+Flask-Cors==5.0.0

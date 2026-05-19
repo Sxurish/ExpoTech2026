@@ -37,7 +37,7 @@ class SubjectService:
         self,
         session: Session,
         *,
-        user_id: int,
+        user_id: str,
         name: str,
         difficulty: int,
         priority: int,
@@ -67,7 +67,7 @@ class SubjectService:
     # ------------------------------------------------------------------
     # Read
     # ------------------------------------------------------------------
-    def get_subjects_for_user(self, session: Session, user_id: int) -> list[Subject]:
+    def get_subjects_for_user(self, session: Session, user_id: str) -> list[Subject]:
         return (
             session.query(Subject)
             .filter_by(user_id=user_id)
@@ -78,7 +78,7 @@ class SubjectService:
     # ------------------------------------------------------------------
     # Delete
     # ------------------------------------------------------------------
-    def delete_subject(self, session: Session, subject_id: int, user_id: int) -> bool:
+    def delete_subject(self, session: Session, subject_id: int, user_id: str) -> bool:
         subject = (
             session.query(Subject)
             .filter_by(id=subject_id, user_id=user_id)
